@@ -1,3 +1,6 @@
+@import "./styles/minecraft-theme.css";
+@import "./styles/android-optimizations.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

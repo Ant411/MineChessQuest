@@ -1,0 +1,500 @@
+/* Android-specific optimizations for landscape chess gameplay */
+
+/* Landscape orientation optimization */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --pixel-size: 1px;
+    --border-thickness: 2px;
+  }
+
+  .minecraft-container {
+    font-size: 12px;
+    overflow-x: hidden;
+  }
+
+  .minecraft-title h1 {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .minecraft-subtitle {
+    font-size: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .minecraft-button {
+    font-size: 0.6rem;
+    padding: 0.5rem 1rem;
+    min-height: 32px;
+    touch-action: manipulation;
+  }
+
+  .minecraft-button-large {
+    font-size: 0.8rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .minecraft-panel {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .minecraft-panel-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Mobile-specific touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .minecraft-button {
+    min-height: 44px; /* Apple's recommended touch target size */
+    min-width: 44px;
+    padding: 0.75rem 1rem;
+    border-width: 2px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .minecraft-button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  .minecraft-input {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+    border-width: 2px;
+  }
+
+  /* Checkbox and radio button optimization */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 24px;
+    min-height: 24px;
+    transform: scale(1.2);
+  }
+
+  /* Select dropdown optimization */
+  select.minecraft-input {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+  }
+}
+
+/* Android-specific WebView optimizations */
+@supports (-webkit-touch-callout: none) {
+  .minecraft-container {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .minecraft-input,
+  .minecraft-textarea {
+    -webkit-user-select: text;
+  }
+}
+
+/* Landscape game layout for mobile devices */
+.mobile-game-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.mobile-game-board {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.mobile-game-sidebar {
+  width: 300px;
+  background: var(--bg-panel);
+  border-left: var(--border-thickness) solid var(--border-color);
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+@media screen and (max-width: 768px) and (orientation: landscape) {
+  .mobile-game-sidebar {
+    width: 250px;
+    padding: 0.5rem;
+  }
+
+  .mobile-game-sidebar .minecraft-button {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+}
+
+/* Responsive chess board sizing for Android */
+.responsive-chess-board {
+  width: min(80vw, 80vh);
+  height: min(80vw, 80vh);
+  max-width: 600px;
+  max-height: 600px;
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .responsive-chess-board {
+    width: min(60vw, 70vh);
+    height: min(60vw, 70vh);
+    max-width: 400px;
+    max-height: 400px;
+  }
+}
+
+/* Mobile menu optimizations */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu-content {
+  min-height: 100vh;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu-header {
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+  border-bottom: var(--border-thickness) solid var(--border-color);
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  z-index: 10;
+}
+
+/* Safe area insets for devices with notches */
+@supports (padding: max(0px)) {
+  .minecraft-container {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .mobile-menu-content {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Performance optimizations for low-end Android devices */
+@media (max-resolution: 150dpi) {
+  .minecraft-container {
+    image-rendering: optimizeSpeed;
+    transform: translateZ(0); /* Force hardware acceleration */
+    -webkit-transform: translateZ(0);
+  }
+
+  .minecraft-button {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  /* Reduce animation complexity on low-end devices */
+  .minecraft-button-selected {
+    animation: none;
+  }
+
+  /* Simplify box shadows */
+  .minecraft-button,
+  .minecraft-panel {
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.2),
+                inset 2px 2px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* High DPI display optimizations */
+@media (min-resolution: 2dppx) {
+  .minecraft-container {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: pixelated;
+  }
+
+  .minecraft-button,
+  .minecraft-panel {
+    border-width: 1px;
+  }
+}
+
+/* Fullscreen game mode for Android */
+.android-fullscreen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.android-fullscreen .minecraft-container {
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
+/* Virtual keyboard handling */
+@media screen and (max-height: 400px) {
+  .keyboard-visible .mobile-menu-content {
+    padding-bottom: 2rem;
+  }
+
+  .keyboard-visible .minecraft-input {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Gesture handling optimizations */
+.gesture-area {
+  touch-action: pan-x pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.no-scroll {
+  touch-action: none;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* Loading states optimized for mobile */
+.mobile-loading {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.mobile-loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--btn-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mobile-loading-text {
+  margin-top: 1rem;
+  font-family: var(--minecraft-font);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Multiplayer UI optimizations for mobile */
+.mobile-multiplayer-menu {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 1000;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-multiplayer-tabs {
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+  border-bottom: var(--border-thickness) solid var(--border-color);
+  padding: 0.5rem;
+  z-index: 10;
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-multiplayer-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-multiplayer-tab {
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+  min-width: 100px;
+}
+
+/* Tournament bracket mobile layout */
+.mobile-tournament-bracket {
+  padding: 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tournament-round {
+  min-width: 250px;
+  margin-right: 1rem;
+}
+
+.tournament-match {
+  margin-bottom: 1rem;
+  touch-action: manipulation;
+}
+
+/* Player connection indicators */
+.connection-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.connection-indicator.connected {
+  background-color: #4CAF50;
+  box-shadow: 0 0 4px #4CAF50;
+}
+
+.connection-indicator.connecting {
+  background-color: #FF9800;
+  animation: pulse 1s infinite;
+}
+
+.connection-indicator.disconnected {
+  background-color: #F44336;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Biome selection grid for mobile */
+.mobile-biome-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.mobile-biome-button {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  touch-action: manipulation;
+  transition: all 0.2s ease;
+}
+
+.mobile-biome-button:active {
+  transform: scale(0.95);
+}
+
+.mobile-biome-button.selected {
+  border-color: var(--btn-selected);
+  background: var(--btn-selected);
+  color: #000;
+}
+
+.mobile-biome-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.mobile-biome-name {
+  font-size: 0.6rem;
+  text-align: center;
+  font-family: var(--minecraft-font);
+}
+
+/* Error states for mobile */
+.mobile-error {
+  padding: 1rem;
+  background: rgba(244, 67, 54, 0.1);
+  border: 2px solid #F44336;
+  border-radius: 4px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.mobile-error-icon {
+  font-size: 2rem;
+  color: #F44336;
+  margin-bottom: 0.5rem;
+}
+
+.mobile-error-text {
+  color: #F44336;
+  font-family: var(--minecraft-font);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Network status indicators */
+.network-status {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-family: var(--minecraft-font);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.network-status.wifi::before {
+  content: "📶";
+}
+
+.network-status.bluetooth::before {
+  content: "🔵";
+}
+
+.network-status.internet::before {
+  content: "🌐";
+}
+
+.network-status.offline::before {
+  content: "⚠️";
+}
+
+/* Haptic feedback classes (requires JavaScript implementation) */
+.haptic-light {
+  /* Light haptic feedback on touch */
+}
+
+.haptic-medium {
+  /* Medium haptic feedback on important actions */
+}
+
+.haptic-heavy {
+  /* Heavy haptic feedback on major events */
+}

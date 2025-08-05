@@ -11,10 +11,14 @@ import { HelpSection } from "./components/ui/HelpSection";
 import { PlayerSetup } from "./components/ui/PlayerSetup";
 import { ScoreBoard } from "./components/ui/ScoreBoard";
 import { ThemeSelector } from "./components/ui/ThemeSelector";
+import { MultiplayerMenu } from "./components/multiplayer/MultiplayerMenu";
+import { TournamentBracket } from "./components/multiplayer/TournamentBracket";
 
 import { useChessGame } from "./lib/stores/useChessGame";
 import { useTheme } from "./lib/stores/useTheme";
 import { useAudio } from "./lib/stores/useAudio";
+import { useMultiplayer } from "./lib/stores/useMultiplayer";
+import { useIsMobile } from "./hooks/use-is-mobile";
 import { SoundManager } from "./lib/minecraft/SoundManager";
 
 const queryClient = new QueryClient();
@@ -34,6 +38,8 @@ const controls = [
 function App() {
   const { gameState, gameMode } = useChessGame();
   const { currentTheme } = useTheme();
+  const { showMultiplayerMenu, showTournamentBracket, currentTournament } = useMultiplayer();
+  const isMobile = useIsMobile();
   const [showCanvas, setShowCanvas] = useState(false);
 
   // Show the canvas once everything is loaded
@@ -44,7 +50,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div 
-        className={`minecraft-container ${currentTheme}`}
+        className={`minecraft-container ${currentTheme} ${isMobile ? 'mobile-layout' : 'desktop-layout'}`}
         style={{ 
           width: '100vw', 
           height: '100vh', 
@@ -90,6 +96,20 @@ function App() {
             )}
             
             <SoundManager />
+            
+            {/* Multiplayer Components */}
+            {showMultiplayerMenu && (
+              <MultiplayerMenu 
+                onClose={() => useMultiplayer.getState().setShowMultiplayerMenu(false)}
+              />
+            )}
+            
+            {showTournamentBracket && currentTournament && (
+              <TournamentBracket 
+                tournament={currentTournament}
+                onClose={() => useMultiplayer.getState().setShowTournamentBracket(false)}
+              />
+            )}
           </KeyboardControls>
         )}
       </div>

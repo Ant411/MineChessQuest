@@ -8,11 +8,15 @@ import { BiomeEnvironment } from './BiomeEnvironment';
 import { AnimationController } from './AnimationController';
 import { useChessGame } from '../../lib/stores/useChessGame';
 import { useTheme } from '../../lib/stores/useTheme';
+import { BiomeEnvironment as BiomeEnvClass } from '../../lib/minecraft/BiomeEnvironments';
+import { useIsMobile } from '../../hooks/use-is-mobile';
 
 export function GameScene() {
   const { currentBiome, gameMode, gameState } = useChessGame();
   const { currentTheme } = useTheme();
+  const isMobile = useIsMobile();
   const controlsRef = useRef<any>();
+  const biomeEnvRef = useRef<BiomeEnvClass | null>(null);
 
   // Lighting setup based on biome and theme
   const getLighting = () => {
@@ -55,6 +59,20 @@ export function GameScene() {
       controlsRef.current.setPosition(0, 8, distance);
     }
   }, [gameMode]);
+
+  // Initialize biome environment
+  useEffect(() => {
+    if (!biomeEnvRef.current) {
+      biomeEnvRef.current = new BiomeEnvClass(currentBiome);
+    }
+  }, [currentBiome]);
+
+  // Update particles each frame
+  useFrame(() => {
+    if (biomeEnvRef.current) {
+      biomeEnvRef.current.updateParticles();
+    }
+  });
 
   return (
     <>

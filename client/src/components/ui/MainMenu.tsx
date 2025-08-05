@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { MinecraftButton } from './MinecraftButton';
 import { useChessGame } from '../../lib/stores/useChessGame';
 import { useTheme } from '../../lib/stores/useTheme';
+import { useMultiplayer } from '../../lib/stores/useMultiplayer';
 
 export function MainMenu() {
   const { setGameState, setGameMode } = useChessGame();
   const { currentTheme } = useTheme();
+  const { setShowMultiplayerMenu } = useMultiplayer();
   const [selectedMode, setSelectedMode] = useState<string>('');
 
   const startGame = (mode: '2player' | '1player' | '3player' | '4player') => {
@@ -72,6 +74,21 @@ export function MainMenu() {
               </div>
             </MinecraftButton>
           ))}
+        </div>
+
+        {/* Multiplayer Section */}
+        <div className="minecraft-multiplayer-section">
+          <MinecraftButton
+            onClick={() => setShowMultiplayerMenu(true)}
+            variant="primary"
+            size="large"
+            className="minecraft-multiplayer-button"
+          >
+            🌐 Online Multiplayer
+          </MinecraftButton>
+          <div className="minecraft-multiplayer-description">
+            Play with friends via WiFi, Bluetooth, or Internet
+          </div>
         </div>
 
         {/* Secondary Menu */}
