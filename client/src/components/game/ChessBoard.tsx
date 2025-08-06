@@ -1,6 +1,6 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture, Box, Plane } from '@react-three/drei';
+import { Box, Plane } from '@react-three/drei';
 import * as THREE from 'three';
 
 import { ChessPiece } from './ChessPiece';
@@ -16,31 +16,32 @@ export function ChessBoard({ gameMode }: ChessBoardProps) {
   const { currentTheme } = useTheme();
   const boardRef = useRef<THREE.Group>(null);
 
-  // Load textures based on biome
-  const woodTexture = useTexture('/textures/wood.jpg');
-  const grassTexture = useTexture('/textures/grass.png');
-  const sandTexture = useTexture('/textures/sand.jpg');
-
-  const getBoardTexture = () => {
-    switch (currentBiome) {
+  // Use procedural materials instead of loading textures that may not exist
+  const getBoardMaterial = () => {
+    const biome = currentBiome as string;
+    switch (biome) {
       case 'desert':
-        return sandTexture;
+        return new THREE.MeshLambertMaterial({ color: '#daa520' });
       case 'forest':
-        return grassTexture;
+        return new THREE.MeshLambertMaterial({ color: '#228b22' });
+      case 'ocean':
+        return new THREE.MeshLambertMaterial({ color: '#4682b4' });
+      case 'nether':
+        return new THREE.MeshLambertMaterial({ color: '#8b0000' });
+      case 'end':
+        return new THREE.MeshLambertMaterial({ color: '#483d8b' });
+      case 'mushroom':
+        return new THREE.MeshLambertMaterial({ color: '#8b4682' });
+      case 'ice':
+        return new THREE.MeshLambertMaterial({ color: '#87ceeb' });
+      case 'jungle':
+        return new THREE.MeshLambertMaterial({ color: '#32cd32' });
       default:
-        return woodTexture;
+        return new THREE.MeshLambertMaterial({ color: '#8b4513' });
     }
   };
 
-  const boardTexture = getBoardTexture();
-
-  // Configure texture
-  useMemo(() => {
-    if (boardTexture) {
-      boardTexture.wrapS = boardTexture.wrapT = THREE.RepeatWrapping;
-      boardTexture.repeat.set(8, 8);
-    }
-  }, [boardTexture]);
+  const boardMaterial = useMemo(() => getBoardMaterial(), [currentBiome]);
 
   // Generate board layout based on game mode
   const getBoardLayout = () => {

@@ -3,7 +3,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 
 export type GameState = "menu" | "player_setup" | "playing" | "game_over" | "help" | "scoreboard";
 export type GameMode = "2player" | "1player" | "3player" | "4player";
-export type Biome = "forest" | "desert" | "ocean" | "nether";
+export type Biome = "forest" | "desert" | "ocean" | "nether" | "end" | "mushroom" | "ice" | "jungle";
 
 interface ChessPiece {
   type: 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
@@ -27,10 +27,10 @@ interface ChessGameState {
   gameMode: GameMode;
   currentBiome: Biome;
   board: (ChessPiece | null)[][];
-  currentPlayer: number;
+  currentPlayer: string;
   selectedSquare: Square | null;
   selectedPiece: ChessPiece | null;
-  validMoves: Square[];
+  validMoves: { from: Square; to: Square }[];
   gameWinner: string | null;
   currentAnimation: Animation | null;
   
@@ -38,9 +38,11 @@ interface ChessGameState {
   setGameState: (state: GameState) => void;
   setGameMode: (mode: GameMode) => void;
   setBiome: (biome: Biome) => void;
+  setCurrentBiome: (biome: string) => void;
   selectSquare: (square: Square) => void;
   selectPiece: (piece: ChessPiece) => void;
   makeMove: (from: Square, to: Square) => void;
+  getValidMoves: (square: Square) => { from: Square; to: Square }[];
   nextPlayer: () => void;
   resetGame: () => void;
   playAnimation: (animation: Animation) => void;
@@ -90,7 +92,7 @@ export const useChessGame = create<ChessGameState>()(
     gameMode: "2player",
     currentBiome: "forest",
     board: initialBoard(),
-    currentPlayer: 0,
+    currentPlayer: "white",
     selectedSquare: null,
     selectedPiece: null,
     validMoves: [],
@@ -102,16 +104,61 @@ export const useChessGame = create<ChessGameState>()(
     setGameMode: (mode) => set({ gameMode: mode }),
     
     setBiome: (biome) => set({ currentBiome: biome }),
+    setCurrentBiome: (biome) => set({ currentBiome: biome as Biome }),
+    
+    getValidMoves: (square) => {
+      const { board } = get();
+      const piece = board[square.row]?.[square.col];
+      if (!piece) return [];
+      
+      const moves: { from: Square; to: Square }[] = [];
+      const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],           [0, 1],
+        [1, -1],  [1, 0],  [1, 1]
+      ];
+      
+      directions.forEach(([dr, dc]) => {
+        const newRow = square.row + dr;
+        const newCol = square.col + dc;
+        
+        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+          const targetPiece = board[newRow][newCol];
+          if (!targetPiece || targetPiece.color !== piece.color) {
+            moves.push({
+              from: square,
+              to: { row: newRow, col: newCol }
+            });
+          }
+        }
+      });
+      
+      return moves;
+    },
     
     selectSquare: (square) => {
-      const { board } = get();
-      const piece = board[square.row][square.col];
-      
-      set({ 
-        selectedSquare: square,
-        selectedPiece: piece,
-        validMoves: piece ? getValidMoves(board, square, piece) : []
-      });
+      const currentState = get();
+      if (currentState.selectedSquare) {
+        const validMoves = get().getValidMoves(currentState.selectedSquare);
+        const isValidMove = validMoves.some(move => 
+          move.to.row === square.row && move.to.col === square.col
+        );
+        
+        if (isValidMove) {
+          get().makeMove(currentState.selectedSquare, square);
+        }
+        set({ selectedSquare: null, validMoves: [] });
+      } else {
+        const piece = currentState.board[square.row][square.col];
+        if (piece && piece.color === currentState.currentPlayer) {
+          const moves = get().getValidMoves(square);
+          set({ 
+            selectedSquare: square,
+            selectedPiece: piece,
+            validMoves: moves
+          });
+        }
+      }
     },
     
     selectPiece: (piece) => set({ selectedPiece: piece }),
@@ -155,16 +202,19 @@ export const useChessGame = create<ChessGameState>()(
     
     nextPlayer: () => {
       const { currentPlayer, gameMode } = get();
-      const playerCount = gameMode === '1player' ? 2 : 
-                          gameMode === '2player' ? 2 :
-                          gameMode === '3player' ? 3 : 4;
+      const playerColors = gameMode === '2player' ? ['white', 'black'] :
+                          gameMode === '3player' ? ['white', 'black', 'red'] :
+                          gameMode === '4player' ? ['white', 'black', 'red', 'blue'] :
+                          ['white', 'black'];
       
-      set({ currentPlayer: (currentPlayer + 1) % playerCount });
+      const currentIndex = playerColors.indexOf(currentPlayer);
+      const nextIndex = (currentIndex + 1) % playerColors.length;
+      set({ currentPlayer: playerColors[nextIndex] });
     },
     
     resetGame: () => set({
       board: initialBoard(),
-      currentPlayer: 0,
+      currentPlayer: "white",
       selectedSquare: null,
       selectedPiece: null,
       validMoves: [],

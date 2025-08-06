@@ -1,500 +1,518 @@
-/* Android-specific optimizations for landscape chess gameplay */
+/* Android Mobile Optimizations */
+/* Screen Rotation and Responsive Design */
 
-/* Landscape orientation optimization */
-@media screen and (orientation: landscape) and (max-height: 500px) {
-  :root {
-    --pixel-size: 1px;
-    --border-thickness: 2px;
-  }
-
-  .minecraft-container {
-    font-size: 12px;
+/* Base mobile styles */
+@media screen and (max-width: 768px) {
+  html, body {
     overflow-x: hidden;
-  }
-
-  .minecraft-title h1 {
-    font-size: 1.5rem;
-    margin: 1rem 0;
-  }
-
-  .minecraft-subtitle {
-    font-size: 0.7rem;
-    margin-bottom: 1rem;
-  }
-
-  .minecraft-button {
-    font-size: 0.6rem;
-    padding: 0.5rem 1rem;
-    min-height: 32px;
     touch-action: manipulation;
-  }
-
-  .minecraft-button-large {
-    font-size: 0.8rem;
-    padding: 0.75rem 1.5rem;
-  }
-
-  .minecraft-panel {
-    padding: 1rem;
-    margin: 0.5rem;
-  }
-
-  .minecraft-panel-title {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-}
-
-/* Mobile-specific touch optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .minecraft-button {
-    min-height: 44px; /* Apple's recommended touch target size */
-    min-width: 44px;
-    padding: 0.75rem 1rem;
-    border-width: 2px;
-    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .minecraft-button:active {
-    transform: scale(0.95);
-    transition: transform 0.1s ease;
+  body {
+    font-size: 16px; /* Prevent zoom on input focus */
   }
 
-  .minecraft-input {
-    min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 0.75rem;
-    border-width: 2px;
-  }
-
-  /* Checkbox and radio button optimization */
-  input[type="checkbox"],
-  input[type="radio"] {
-    min-width: 24px;
-    min-height: 24px;
-    transform: scale(1.2);
-  }
-
-  /* Select dropdown optimization */
-  select.minecraft-input {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 12px;
-    padding-right: 2.5rem;
-  }
-}
-
-/* Android-specific WebView optimizations */
-@supports (-webkit-touch-callout: none) {
-  .minecraft-container {
-    -webkit-user-select: none;
+  * {
     -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
-  .minecraft-input,
-  .minecraft-textarea {
+  input, textarea {
     -webkit-user-select: text;
+    user-select: text;
   }
 }
 
-/* Landscape game layout for mobile devices */
-.mobile-game-layout {
-  display: flex;
+/* Mobile Menu Optimizations */
+.mobile-menu {
+  width: 100vw;
   height: 100vh;
-  overflow: hidden;
-}
-
-.mobile-game-board {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.mobile-game-sidebar {
-  width: 300px;
-  background: var(--bg-panel);
-  border-left: var(--border-thickness) solid var(--border-color);
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-@media screen and (max-width: 768px) and (orientation: landscape) {
-  .mobile-game-sidebar {
-    width: 250px;
-    padding: 0.5rem;
-  }
-
-  .mobile-game-sidebar .minecraft-button {
-    width: 100%;
-    margin: 0.25rem 0;
-  }
-}
-
-/* Responsive chess board sizing for Android */
-.responsive-chess-board {
-  width: min(80vw, 80vh);
-  height: min(80vw, 80vh);
-  max-width: 600px;
-  max-height: 600px;
-}
-
-@media screen and (orientation: landscape) and (max-height: 500px) {
-  .responsive-chess-board {
-    width: min(60vw, 70vh);
-    height: min(60vw, 70vh);
-    max-width: 400px;
-    max-height: 400px;
-  }
-}
-
-/* Mobile menu optimizations */
-.mobile-menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+  padding: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.mobile-menu-content {
-  min-height: 100vh;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
+.scrollable-container {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
-.mobile-menu-header {
-  position: sticky;
-  top: 0;
-  background: var(--bg-panel);
-  border-bottom: var(--border-thickness) solid var(--border-color);
-  padding: 1rem;
-  margin: -1rem -1rem 1rem -1rem;
+.minecraft-container {
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.minecraft-game-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.minecraft-mode-button {
+  width: 100% !important;
+  min-height: 80px;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.minecraft-mode-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.minecraft-mode-icon {
+  font-size: 2rem;
+  min-width: 50px;
+  text-align: center;
+}
+
+.minecraft-mode-text {
+  flex: 1;
+  text-align: left;
+}
+
+.minecraft-mode-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.minecraft-mode-description {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Mobile Instructions Panel */
+.minecraft-mobile-instructions {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.minecraft-instructions-panel {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #fbbf24;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.minecraft-section-title {
+  color: #fbbf24;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.instruction-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.instruction-icon {
+  font-size: 1.5rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.instruction-text {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #e5e5e5;
+}
+
+/* Touch Chess Controls */
+.touch-chess-controls {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+}
+
+.touch-chess-board {
+  flex: 1;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  gap: 2px;
+  padding: 10px;
+  background: #8b4513;
+  margin: 0 auto;
+  max-width: min(100vw - 20px, 100vh - 200px);
+  aspect-ratio: 1;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.touch-square {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #654321;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.3s ease;
+}
+
+.light-square {
+  background: #f0d9b5;
+}
+
+.dark-square {
+  background: #b58863;
+}
+
+.selected-square {
+  background: #fbbf24 !important;
+  box-shadow: 0 0 10px #fbbf24;
+  border: 3px solid #f59e0b;
   z-index: 10;
 }
 
-/* Safe area insets for devices with notches */
-@supports (padding: max(0px)) {
-  .minecraft-container {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-    padding-top: max(1rem, env(safe-area-inset-top));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-
-  .mobile-menu-content {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-    padding-top: max(1rem, env(safe-area-inset-top));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
+.valid-move-square {
+  background: radial-gradient(circle at center, rgba(34, 197, 94, 0.4) 30%, transparent 50%);
+  border: 2px solid #22c55e;
 }
 
-/* Performance optimizations for low-end Android devices */
-@media (max-resolution: 150dpi) {
-  .minecraft-container {
-    image-rendering: optimizeSpeed;
-    transform: translateZ(0); /* Force hardware acceleration */
-    -webkit-transform: translateZ(0);
-  }
-
-  .minecraft-button {
-    will-change: transform;
-    backface-visibility: hidden;
-  }
-
-  /* Reduce animation complexity on low-end devices */
-  .minecraft-button-selected {
-    animation: none;
-  }
-
-  /* Simplify box shadows */
-  .minecraft-button,
-  .minecraft-panel {
-    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.2),
-                inset 2px 2px 0 rgba(255, 255, 255, 0.2);
-  }
+.drag-target {
+  background: rgba(239, 68, 68, 0.4) !important;
+  border: 3px solid #ef4444;
 }
 
-/* High DPI display optimizations */
-@media (min-resolution: 2dppx) {
-  .minecraft-container {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: pixelated;
-  }
-
-  .minecraft-button,
-  .minecraft-panel {
-    border-width: 1px;
-  }
+.square-coordinate {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 8px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: bold;
 }
 
-/* Fullscreen game mode for Android */
-.android-fullscreen {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-primary);
-  z-index: 999;
-  overflow: hidden;
+.touch-piece {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
 }
 
-.android-fullscreen .minecraft-container {
-  height: 100vh;
-  padding: 0;
-  margin: 0;
+.touch-piece.dragging {
+  transform: scale(1.2);
+  z-index: 100;
+  opacity: 0.8;
 }
 
-/* Virtual keyboard handling */
-@media screen and (max-height: 400px) {
-  .keyboard-visible .mobile-menu-content {
-    padding-bottom: 2rem;
-  }
-
-  .keyboard-visible .minecraft-input {
-    margin-bottom: 1rem;
-  }
-}
-
-/* Gesture handling optimizations */
-.gesture-area {
-  touch-action: pan-x pan-y;
-  -webkit-user-select: none;
+.piece-icon {
+  font-size: min(2rem, 8vw);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
   user-select: none;
 }
 
-.no-scroll {
-  touch-action: none;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
+.piece-name {
+  font-size: 6px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 1px;
 }
 
-/* Loading states optimized for mobile */
-.mobile-loading {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
+.valid-move-indicator {
+  position: absolute;
+  font-size: 1rem;
+  color: #22c55e;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-.mobile-loading-spinner {
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.drag-preview {
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.preview-piece {
   width: 60px;
   height: 60px;
-  border: 4px solid var(--border-color);
-  border-top: 4px solid var(--btn-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(251, 191, 36, 0.8);
+  border: 2px solid #f59e0b;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Touch Controls UI */
+.touch-controls-ui {
+  background: rgba(0, 0, 0, 0.9);
+  padding: 15px;
+  border-top: 2px solid #fbbf24;
 }
 
-.mobile-loading-text {
-  margin-top: 1rem;
-  font-family: var(--minecraft-font);
-  color: var(--text-primary);
-  text-align: center;
+.game-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-/* Multiplayer UI optimizations for mobile */
-.mobile-multiplayer-menu {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-primary);
-  z-index: 1000;
+.current-player-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.player-dot.white-dot { background: #ffffff; }
+.player-dot.black-dot { background: #2c2c2c; }
+.player-dot.red-dot { background: #dc2626; }
+.player-dot.blue-dot { background: #2563eb; }
+
+.player-text {
+  color: #fbbf24;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.selected-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.8rem;
+}
+
+.selected-text {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.valid-moves-count {
+  color: #94a3b8;
+}
+
+.touch-instructions {
+  display: flex;
+  gap: 15px;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* Landscape Mode Optimizations */
+@media screen and (orientation: landscape) and (max-width: 1024px) {
+  .mobile-game-layout.landscape {
+    display: flex;
+    height: 100vh;
+  }
+
+  .game-board-section {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .game-ui-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+  }
+
+  .touch-chess-board {
+    max-width: min(60vw, 100vh - 20px);
+    max-height: 100vh - 20px;
+  }
+
+  .minecraft-container {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .minecraft-mode-button {
+    min-height: 60px;
+    padding: 10px;
+  }
+
+  .minecraft-mode-icon {
+    font-size: 1.5rem;
+    min-width: 40px;
+  }
+
+  .minecraft-mode-title {
+    font-size: 1rem;
+  }
+
+  .minecraft-mode-description {
+    font-size: 0.8rem;
+  }
+}
+
+/* Portrait Mode Optimizations */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  .mobile-game-layout.portrait {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .mobile-game-info {
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px 15px;
+    border-bottom: 2px solid #fbbf24;
+  }
+
+  .mobile-chess-board {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .mobile-game-controls {
+    background: rgba(0, 0, 0, 0.9);
+    padding: 15px;
+    border-top: 2px solid #fbbf24;
+  }
+}
+
+/* Character Showcase Mobile */
+.character-detail-panel {
+  height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.mobile-multiplayer-tabs {
-  position: sticky;
-  top: 0;
-  background: var(--bg-panel);
-  border-bottom: var(--border-thickness) solid var(--border-color);
-  padding: 0.5rem;
-  z-index: 10;
-  display: flex;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+.character-header {
+  border-bottom: 2px solid #475569;
+  padding-bottom: 20px;
 }
 
-.mobile-multiplayer-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.mobile-multiplayer-tab {
+.character-thumbnail {
   flex-shrink: 0;
-  margin-right: 0.5rem;
-  min-width: 100px;
 }
 
-/* Tournament bracket mobile layout */
-.mobile-tournament-bracket {
-  padding: 1rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+.character-variants {
+  border-bottom: 1px solid #475569;
+  padding-bottom: 20px;
 }
 
-.tournament-round {
-  min-width: 250px;
-  margin-right: 1rem;
+.variant-card {
+  transition: all 0.3s ease;
 }
 
-.tournament-match {
-  margin-bottom: 1rem;
-  touch-action: manipulation;
+.variant-card:hover {
+  background: #475569 !important;
 }
 
-/* Player connection indicators */
-.connection-indicator {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 0.5rem;
+.character-abilities .ability-item {
+  transition: all 0.3s ease;
 }
 
-.connection-indicator.connected {
-  background-color: #4CAF50;
-  box-shadow: 0 0 4px #4CAF50;
+.character-abilities .ability-item:hover {
+  background: #475569 !important;
 }
 
-.connection-indicator.connecting {
-  background-color: #FF9800;
-  animation: pulse 1s infinite;
-}
-
-.connection-indicator.disconnected {
-  background-color: #F44336;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Biome selection grid for mobile */
-.mobile-biome-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.mobile-biome-button {
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--bg-panel);
-  touch-action: manipulation;
-  transition: all 0.2s ease;
-}
-
-.mobile-biome-button:active {
-  transform: scale(0.95);
-}
-
-.mobile-biome-button.selected {
-  border-color: var(--btn-selected);
-  background: var(--btn-selected);
-  color: #000;
-}
-
-.mobile-biome-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.mobile-biome-name {
-  font-size: 0.6rem;
-  text-align: center;
-  font-family: var(--minecraft-font);
-}
-
-/* Error states for mobile */
-.mobile-error {
-  padding: 1rem;
-  background: rgba(244, 67, 54, 0.1);
-  border: 2px solid #F44336;
-  border-radius: 4px;
-  margin: 1rem 0;
-  text-align: center;
-}
-
-.mobile-error-icon {
-  font-size: 2rem;
-  color: #F44336;
-  margin-bottom: 0.5rem;
-}
-
-.mobile-error-text {
-  color: #F44336;
-  font-family: var(--minecraft-font);
-  font-size: 0.8rem;
-  line-height: 1.4;
-}
-
-/* Network status indicators */
-.network-status {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
+/* Mobile scroll indicator */
+.mobile-scroll-indicator {
   background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-family: var(--minecraft-font);
-  z-index: 1001;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  border-top: 1px solid #475569;
+  position: sticky;
+  bottom: 0;
 }
 
-.network-status.wifi::before {
-  content: "📶";
+/* Button optimizations for touch */
+.minecraft-button {
+  min-height: 44px; /* iOS touch target minimum */
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  font-family: 'Minecraft', monospace;
 }
 
-.network-status.bluetooth::before {
-  content: "🔵";
+.minecraft-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.network-status.internet::before {
-  content: "🌐";
+.minecraft-button-small {
+  min-height: 36px;
+  font-size: 0.8rem;
+  padding: 8px 12px;
 }
 
-.network-status.offline::before {
-  content: "⚠️";
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .piece-icon {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
-/* Haptic feedback classes (requires JavaScript implementation) */
-.haptic-light {
-  /* Light haptic feedback on touch */
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.haptic-medium {
-  /* Medium haptic feedback on important actions */
-}
-
-.haptic-heavy {
-  /* Heavy haptic feedback on major events */
+/* Dark mode adjustments for mobile */
+@media (prefers-color-scheme: dark) {
+  .minecraft-menu {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+  }
+  
+  .touch-chess-controls {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+  }
 }

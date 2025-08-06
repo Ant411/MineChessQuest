@@ -1,336 +1,477 @@
+// Chess game logic and types
 export type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
 export type PieceColor = 'white' | 'black' | 'red' | 'blue';
 
 export interface ChessPiece {
   type: PieceType;
   color: PieceColor;
-  hasMoved?: boolean;
+  position?: { row: number; col: number };
+  id?: string;
 }
 
-export interface Position {
+export interface Square {
   row: number;
   col: number;
 }
 
 export interface Move {
-  from: Position;
-  to: Position;
+  from: Square;
+  to: Square;
   piece: ChessPiece;
-  capturedPiece?: ChessPiece | null;
-  specialMove?: 'castling' | 'en_passant' | 'promotion';
+  capturedPiece?: ChessPiece;
+  special?: 'castling' | 'en_passant' | 'promotion';
+}
+
+export interface GameResult {
+  winner: PieceColor | null;
+  type: 'checkmate' | 'stalemate' | 'draw' | 'resignation';
+  moves: Move[];
 }
 
 export class ChessLogic {
-  static isValidMove(
-    board: (ChessPiece | null)[][],
-    from: Position,
-    to: Position,
-    gameMode: string = '2player'
-  ): boolean {
-    const piece = board[from.row][from.col];
-    if (!piece) return false;
+  private board: (ChessPiece | null)[][];
+  private currentPlayer: PieceColor;
+  private gameHistory: Move[];
+  private gameMode: '2player' | '3player' | '4player';
 
-    // Check if destination is within bounds
-    if (!this.isInBounds(to, gameMode)) return false;
-
-    // Check if destination has own piece
-    const targetPiece = board[to.row][to.col];
-    if (targetPiece && targetPiece.color === piece.color) return false;
-
-    // Get valid moves for this piece
-    const validMoves = this.getValidMoves(board, from, gameMode);
-    return validMoves.some(move => move.row === to.row && move.col === to.col);
+  constructor(gameMode: '2player' | '3player' | '4player' = '2player') {
+    this.gameMode = gameMode;
+    this.board = this.initializeBoard();
+    this.currentPlayer = 'white';
+    this.gameHistory = [];
   }
 
-  static getValidMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    gameMode: string = '2player'
-  ): Position[] {
-    const piece = board[position.row][position.col];
-    if (!piece) return [];
+  private initializeBoard(): (ChessPiece | null)[][] {
+    const board: (ChessPiece | null)[][] = Array(8).fill(null).map(() => Array(8).fill(null));
+    
+    if (this.gameMode === '2player') {
+      return this.init2PlayerBoard(board);
+    } else if (this.gameMode === '3player') {
+      return this.init3PlayerBoard(board);
+    } else {
+      return this.init4PlayerBoard(board);
+    }
+  }
 
+  private init2PlayerBoard(board: (ChessPiece | null)[][]): (ChessPiece | null)[][] {
+    // Standard chess setup
+    const backRow: PieceType[] = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+    
+    // Black pieces (top)
+    for (let i = 0; i < 8; i++) {
+      board[0][i] = { type: backRow[i], color: 'black' };
+      board[1][i] = { type: 'pawn', color: 'black' };
+    }
+    
+    // White pieces (bottom)  
+    for (let i = 0; i < 8; i++) {
+      board[6][i] = { type: 'pawn', color: 'white' };
+      board[7][i] = { type: backRow[i], color: 'white' };
+    }
+    
+    return board;
+  }
+
+  private init3PlayerBoard(board: (ChessPiece | null)[][]): (ChessPiece | null)[][] {
+    // Triangular arrangement for 3 players
+    // White at bottom, Black at top-left, Red at top-right
+    const backRow: PieceType[] = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+    
+    // White pieces (bottom)
+    for (let i = 0; i < 8; i++) {
+      board[6][i] = { type: 'pawn', color: 'white' };
+      board[7][i] = { type: backRow[i], color: 'white' };
+    }
+    
+    // Black pieces (top-left)
+    for (let i = 0; i < 4; i++) {
+      board[0][i] = { type: backRow[i], color: 'black' };
+      board[1][i] = { type: 'pawn', color: 'black' };
+    }
+    
+    // Red pieces (top-right)
+    for (let i = 4; i < 8; i++) {
+      board[0][i] = { type: backRow[i], color: 'red' };
+      board[1][i] = { type: 'pawn', color: 'red' };
+    }
+    
+    return board;
+  }
+
+  private init4PlayerBoard(board: (ChessPiece | null)[][]): (ChessPiece | null)[][] {
+    // Four-corner setup
+    const cornerPieces: PieceType[] = ['rook', 'knight', 'bishop', 'queen'];
+    
+    // White (bottom)
+    for (let i = 2; i < 6; i++) {
+      board[6][i] = { type: 'pawn', color: 'white' };
+      board[7][i] = { type: cornerPieces[i - 2], color: 'white' };
+    }
+    board[7][3] = { type: 'king', color: 'white' };
+    
+    // Black (top)
+    for (let i = 2; i < 6; i++) {
+      board[1][i] = { type: 'pawn', color: 'black' };
+      board[0][i] = { type: cornerPieces[i - 2], color: 'black' };
+    }
+    board[0][3] = { type: 'king', color: 'black' };
+    
+    // Red (left)
+    for (let i = 2; i < 6; i++) {
+      board[i][1] = { type: 'pawn', color: 'red' };
+      board[i][0] = { type: cornerPieces[i - 2], color: 'red' };
+    }
+    board[3][0] = { type: 'king', color: 'red' };
+    
+    // Blue (right)
+    for (let i = 2; i < 6; i++) {
+      board[i][6] = { type: 'pawn', color: 'blue' };
+      board[i][7] = { type: cornerPieces[i - 2], color: 'blue' };
+    }
+    board[3][7] = { type: 'king', color: 'blue' };
+    
+    return board;
+  }
+
+  public getBoard(): (ChessPiece | null)[][] {
+    return this.board.map(row => [...row]);
+  }
+
+  public getCurrentPlayer(): PieceColor {
+    return this.currentPlayer;
+  }
+
+  public getValidMoves(from: Square): Square[] {
+    const piece = this.board[from.row]?.[from.col];
+    if (!piece || piece.color !== this.currentPlayer) {
+      return [];
+    }
+
+    const moves: Square[] = [];
+    
     switch (piece.type) {
       case 'pawn':
-        return this.getPawnMoves(board, position, piece, gameMode);
+        moves.push(...this.getPawnMoves(from, piece.color));
+        break;
       case 'rook':
-        return this.getRookMoves(board, position, piece, gameMode);
+        moves.push(...this.getRookMoves(from));
+        break;
       case 'knight':
-        return this.getKnightMoves(board, position, piece, gameMode);
+        moves.push(...this.getKnightMoves(from));
+        break;
       case 'bishop':
-        return this.getBishopMoves(board, position, piece, gameMode);
+        moves.push(...this.getBishopMoves(from));
+        break;
       case 'queen':
-        return this.getQueenMoves(board, position, piece, gameMode);
+        moves.push(...this.getQueenMoves(from));
+        break;
       case 'king':
-        return this.getKingMoves(board, position, piece, gameMode);
-      default:
-        return [];
+        moves.push(...this.getKingMoves(from));
+        break;
     }
+
+    // Filter out moves that would put own king in check
+    return moves.filter(to => !this.wouldBeInCheck(from, to, piece.color));
   }
 
-  private static getPawnMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    piece: ChessPiece,
-    gameMode: string
-  ): Position[] {
-    const moves: Position[] = [];
-    const { row, col } = position;
+  private getPawnMoves(from: Square, color: PieceColor): Square[] {
+    const moves: Square[] = [];
+    const direction = color === 'white' ? -1 : 1;
+    const startRow = color === 'white' ? 6 : 1;
     
-    // Direction based on color
-    const direction = piece.color === 'white' ? -1 : 1;
-    const startRow = piece.color === 'white' ? 6 : 1;
-
     // Forward move
-    const nextRow = row + direction;
-    if (this.isInBounds({ row: nextRow, col }, gameMode) && !board[nextRow][col]) {
-      moves.push({ row: nextRow, col });
-
-      // Double move from starting position
-      if (row === startRow) {
-        const doubleRow = row + 2 * direction;
-        if (this.isInBounds({ row: doubleRow, col }, gameMode) && !board[doubleRow][col]) {
-          moves.push({ row: doubleRow, col });
+    const oneForward = { row: from.row + direction, col: from.col };
+    if (this.isValidSquare(oneForward) && !this.board[oneForward.row][oneForward.col]) {
+      moves.push(oneForward);
+      
+      // Two squares forward from starting position
+      if (from.row === startRow) {
+        const twoForward = { row: from.row + 2 * direction, col: from.col };
+        if (this.isValidSquare(twoForward) && !this.board[twoForward.row][twoForward.col]) {
+          moves.push(twoForward);
         }
       }
     }
-
+    
     // Diagonal captures
-    [-1, 1].forEach(dc => {
-      const newCol = col + dc;
-      if (this.isInBounds({ row: nextRow, col: newCol }, gameMode)) {
-        const target = board[nextRow][newCol];
-        if (target && target.color !== piece.color) {
-          moves.push({ row: nextRow, col: newCol });
-        }
-      }
-    });
-
+    const captureLeft = { row: from.row + direction, col: from.col - 1 };
+    const captureRight = { row: from.row + direction, col: from.col + 1 };
+    
+    if (this.isValidSquare(captureLeft) && this.isEnemyPiece(captureLeft, color)) {
+      moves.push(captureLeft);
+    }
+    
+    if (this.isValidSquare(captureRight) && this.isEnemyPiece(captureRight, color)) {
+      moves.push(captureRight);
+    }
+    
     return moves;
   }
 
-  private static getRookMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    piece: ChessPiece,
-    gameMode: string
-  ): Position[] {
-    const moves: Position[] = [];
+  private getRookMoves(from: Square): Square[] {
+    const moves: Square[] = [];
     const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-
-    directions.forEach(([dr, dc]) => {
-      for (let i = 1; i < 10; i++) {
-        const newRow = position.row + dr * i;
-        const newCol = position.col + dc * i;
-        const newPos = { row: newRow, col: newCol };
-
-        if (!this.isInBounds(newPos, gameMode)) break;
-
-        const target = board[newRow][newCol];
-        if (!target) {
-          moves.push(newPos);
+    
+    for (const [dr, dc] of directions) {
+      for (let i = 1; i < 8; i++) {
+        const to = { row: from.row + dr * i, col: from.col + dc * i };
+        if (!this.isValidSquare(to)) break;
+        
+        const targetPiece = this.board[to.row][to.col];
+        if (!targetPiece) {
+          moves.push(to);
         } else {
-          if (target.color !== piece.color) {
-            moves.push(newPos);
+          if (targetPiece.color !== this.currentPlayer) {
+            moves.push(to);
           }
           break;
         }
       }
-    });
-
+    }
+    
     return moves;
   }
 
-  private static getKnightMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    piece: ChessPiece,
-    gameMode: string
-  ): Position[] {
-    const moves: Position[] = [];
+  private getKnightMoves(from: Square): Square[] {
+    const moves: Square[] = [];
     const knightMoves = [
       [-2, -1], [-2, 1], [-1, -2], [-1, 2],
       [1, -2], [1, 2], [2, -1], [2, 1]
     ];
-
-    knightMoves.forEach(([dr, dc]) => {
-      const newRow = position.row + dr;
-      const newCol = position.col + dc;
-      const newPos = { row: newRow, col: newCol };
-
-      if (this.isInBounds(newPos, gameMode)) {
-        const target = board[newRow][newCol];
-        if (!target || target.color !== piece.color) {
-          moves.push(newPos);
-        }
-      }
-    });
-
-    return moves;
-  }
-
-  private static getBishopMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    piece: ChessPiece,
-    gameMode: string
-  ): Position[] {
-    const moves: Position[] = [];
-    const directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
-
-    directions.forEach(([dr, dc]) => {
-      for (let i = 1; i < 10; i++) {
-        const newRow = position.row + dr * i;
-        const newCol = position.col + dc * i;
-        const newPos = { row: newRow, col: newCol };
-
-        if (!this.isInBounds(newPos, gameMode)) break;
-
-        const target = board[newRow][newCol];
-        if (!target) {
-          moves.push(newPos);
-        } else {
-          if (target.color !== piece.color) {
-            moves.push(newPos);
-          }
-          break;
-        }
-      }
-    });
-
-    return moves;
-  }
-
-  private static getQueenMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    piece: ChessPiece,
-    gameMode: string
-  ): Position[] {
-    // Queen moves like both rook and bishop
-    return [
-      ...this.getRookMoves(board, position, piece, gameMode),
-      ...this.getBishopMoves(board, position, piece, gameMode)
-    ];
-  }
-
-  private static getKingMoves(
-    board: (ChessPiece | null)[][],
-    position: Position,
-    piece: ChessPiece,
-    gameMode: string
-  ): Position[] {
-    const moves: Position[] = [];
     
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        if (dr === 0 && dc === 0) continue;
+    for (const [dr, dc] of knightMoves) {
+      const to = { row: from.row + dr, col: from.col + dc };
+      if (this.isValidSquare(to)) {
+        const targetPiece = this.board[to.row][to.col];
+        if (!targetPiece || targetPiece.color !== this.currentPlayer) {
+          moves.push(to);
+        }
+      }
+    }
+    
+    return moves;
+  }
+
+  private getBishopMoves(from: Square): Square[] {
+    const moves: Square[] = [];
+    const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+    
+    for (const [dr, dc] of directions) {
+      for (let i = 1; i < 8; i++) {
+        const to = { row: from.row + dr * i, col: from.col + dc * i };
+        if (!this.isValidSquare(to)) break;
         
-        const newRow = position.row + dr;
-        const newCol = position.col + dc;
-        const newPos = { row: newRow, col: newCol };
-
-        if (this.isInBounds(newPos, gameMode)) {
-          const target = board[newRow][newCol];
-          if (!target || target.color !== piece.color) {
-            moves.push(newPos);
+        const targetPiece = this.board[to.row][to.col];
+        if (!targetPiece) {
+          moves.push(to);
+        } else {
+          if (targetPiece.color !== this.currentPlayer) {
+            moves.push(to);
           }
-        }
-      }
-    }
-
-    return moves;
-  }
-
-  private static isInBounds(position: Position, gameMode: string): boolean {
-    const { row, col } = position;
-    
-    switch (gameMode) {
-      case '3player':
-        // Triangular board bounds
-        return row >= 0 && row < 9 && col >= 0 && col <= row;
-      case '4player':
-        // 10x10 board
-        return row >= 0 && row < 10 && col >= 0 && col < 10;
-      default:
-        // Standard 8x8 board
-        return row >= 0 && row < 8 && col >= 0 && col < 8;
-    }
-  }
-
-  static isInCheck(
-    board: (ChessPiece | null)[][],
-    kingColor: PieceColor,
-    gameMode: string = '2player'
-  ): boolean {
-    // Find the king
-    let kingPosition: Position | null = null;
-    
-    for (let row = 0; row < board.length; row++) {
-      for (let col = 0; col < board[row].length; col++) {
-        const piece = board[row][col];
-        if (piece && piece.type === 'king' && piece.color === kingColor) {
-          kingPosition = { row, col };
           break;
         }
       }
-      if (kingPosition) break;
     }
+    
+    return moves;
+  }
 
+  private getQueenMoves(from: Square): Square[] {
+    return [...this.getRookMoves(from), ...this.getBishopMoves(from)];
+  }
+
+  private getKingMoves(from: Square): Square[] {
+    const moves: Square[] = [];
+    const directions = [
+      [-1, -1], [-1, 0], [-1, 1],
+      [0, -1],           [0, 1],
+      [1, -1],  [1, 0],  [1, 1]
+    ];
+    
+    for (const [dr, dc] of directions) {
+      const to = { row: from.row + dr, col: from.col + dc };
+      if (this.isValidSquare(to)) {
+        const targetPiece = this.board[to.row][to.col];
+        if (!targetPiece || targetPiece.color !== this.currentPlayer) {
+          moves.push(to);
+        }
+      }
+    }
+    
+    return moves;
+  }
+
+  private isValidSquare(square: Square): boolean {
+    return square.row >= 0 && square.row < 8 && square.col >= 0 && square.col < 8;
+  }
+
+  private isEnemyPiece(square: Square, playerColor: PieceColor): boolean {
+    const piece = this.board[square.row][square.col];
+    return piece !== null && piece.color !== playerColor;
+  }
+
+  private wouldBeInCheck(from: Square, to: Square, playerColor: PieceColor): boolean {
+    // Temporarily make the move
+    const originalPiece = this.board[to.row][to.col];
+    const movingPiece = this.board[from.row][from.col];
+    
+    this.board[to.row][to.col] = movingPiece;
+    this.board[from.row][from.col] = null;
+    
+    // Check if king is in check
+    const inCheck = this.isKingInCheck(playerColor);
+    
+    // Restore the board
+    this.board[from.row][from.col] = movingPiece;
+    this.board[to.row][to.col] = originalPiece;
+    
+    return inCheck;
+  }
+
+  private isKingInCheck(playerColor: PieceColor): boolean {
+    const kingPosition = this.findKing(playerColor);
     if (!kingPosition) return false;
-
+    
     // Check if any enemy piece can attack the king
-    for (let row = 0; row < board.length; row++) {
-      for (let col = 0; col < board[row].length; col++) {
-        const piece = board[row][col];
-        if (piece && piece.color !== kingColor) {
-          const moves = this.getValidMoves(board, { row, col }, gameMode);
-          if (moves.some(move => move.row === kingPosition!.row && move.col === kingPosition!.col)) {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = this.board[row][col];
+        if (piece && piece.color !== playerColor) {
+          const moves = this.getValidMovesForPiece({ row, col }, piece);
+          if (moves.some(move => move.row === kingPosition.row && move.col === kingPosition.col)) {
             return true;
           }
         }
       }
     }
-
+    
     return false;
   }
 
-  static isCheckmate(
-    board: (ChessPiece | null)[][],
-    kingColor: PieceColor,
-    gameMode: string = '2player'
-  ): boolean {
-    if (!this.isInCheck(board, kingColor, gameMode)) {
+  private findKing(color: PieceColor): Square | null {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = this.board[row][col];
+        if (piece && piece.type === 'king' && piece.color === color) {
+          return { row, col };
+        }
+      }
+    }
+    return null;
+  }
+
+  private getValidMovesForPiece(from: Square, piece: ChessPiece): Square[] {
+    // Similar to getValidMoves but without check validation to avoid recursion
+    const moves: Square[] = [];
+    
+    switch (piece.type) {
+      case 'pawn':
+        return this.getPawnMoves(from, piece.color);
+      case 'rook':
+        return this.getRookMoves(from);
+      case 'knight':
+        return this.getKnightMoves(from);
+      case 'bishop':
+        return this.getBishopMoves(from);
+      case 'queen':
+        return this.getQueenMoves(from);
+      case 'king':
+        return this.getKingMoves(from);
+    }
+    
+    return moves;
+  }
+
+  public makeMove(from: Square, to: Square): boolean {
+    const piece = this.board[from.row][from.col];
+    if (!piece || piece.color !== this.currentPlayer) {
       return false;
     }
 
-    // Try all possible moves for the player
-    for (let row = 0; row < board.length; row++) {
-      for (let col = 0; col < board[row].length; col++) {
-        const piece = board[row][col];
-        if (piece && piece.color === kingColor) {
-          const moves = this.getValidMoves(board, { row, col }, gameMode);
-          
-          for (const move of moves) {
-            // Simulate the move
-            const originalPiece = board[move.row][move.col];
-            board[move.row][move.col] = piece;
-            board[row][col] = null;
+    const validMoves = this.getValidMoves(from);
+    const isValidMove = validMoves.some(move => move.row === to.row && move.col === to.col);
+    
+    if (!isValidMove) {
+      return false;
+    }
 
-            const stillInCheck = this.isInCheck(board, kingColor, gameMode);
+    // Make the move
+    const capturedPiece = this.board[to.row][to.col];
+    this.board[to.row][to.col] = piece;
+    this.board[from.row][from.col] = null;
 
-            // Undo the move
-            board[row][col] = piece;
-            board[move.row][move.col] = originalPiece;
+    // Record the move
+    const move: Move = { from, to, piece, capturedPiece: capturedPiece || undefined };
+    this.gameHistory.push(move);
 
-            if (!stillInCheck) {
-              return false; // Found a move that gets out of check
-            }
+    // Switch to next player
+    this.nextPlayer();
+
+    return true;
+  }
+
+  private nextPlayer(): void {
+    const playerOrder: PieceColor[] = 
+      this.gameMode === '2player' ? ['white', 'black'] :
+      this.gameMode === '3player' ? ['white', 'black', 'red'] :
+      ['white', 'black', 'red', 'blue'];
+
+    const currentIndex = playerOrder.indexOf(this.currentPlayer);
+    this.currentPlayer = playerOrder[(currentIndex + 1) % playerOrder.length];
+  }
+
+  public isGameOver(): GameResult | null {
+    // Check for checkmate, stalemate, etc.
+    const validMovesExist = this.hasValidMoves(this.currentPlayer);
+    const inCheck = this.isKingInCheck(this.currentPlayer);
+
+    if (!validMovesExist) {
+      if (inCheck) {
+        // Checkmate
+        const winner = this.getPreviousPlayer();
+        return {
+          winner,
+          type: 'checkmate',
+          moves: [...this.gameHistory]
+        };
+      } else {
+        // Stalemate
+        return {
+          winner: null,
+          type: 'stalemate',
+          moves: [...this.gameHistory]
+        };
+      }
+    }
+
+    return null;
+  }
+
+  private hasValidMoves(playerColor: PieceColor): boolean {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = this.board[row][col];
+        if (piece && piece.color === playerColor) {
+          const moves = this.getValidMoves({ row, col });
+          if (moves.length > 0) {
+            return true;
           }
         }
       }
     }
+    return false;
+  }
 
-    return true; // No moves can get out of check
+  private getPreviousPlayer(): PieceColor {
+    const playerOrder: PieceColor[] = 
+      this.gameMode === '2player' ? ['white', 'black'] :
+      this.gameMode === '3player' ? ['white', 'black', 'red'] :
+      ['white', 'black', 'red', 'blue'];
+
+    const currentIndex = playerOrder.indexOf(this.currentPlayer);
+    const prevIndex = (currentIndex - 1 + playerOrder.length) % playerOrder.length;
+    return playerOrder[prevIndex];
   }
 }
+
+export default ChessLogic;

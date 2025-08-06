@@ -3,12 +3,15 @@ import { MinecraftButton } from './MinecraftButton';
 import { useChessGame } from '../../lib/stores/useChessGame';
 import { useTheme } from '../../lib/stores/useTheme';
 import { useMultiplayer } from '../../lib/stores/useMultiplayer';
+import { useIsMobile } from '../../hooks/use-is-mobile';
 
 export function MainMenu() {
   const { setGameState, setGameMode } = useChessGame();
   const { currentTheme } = useTheme();
   const { setShowMultiplayerMenu } = useMultiplayer();
+  const isMobile = useIsMobile();
   const [selectedMode, setSelectedMode] = useState<string>('');
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const startGame = (mode: '2player' | '1player' | '3player' | '4player') => {
     setGameMode(mode);
@@ -43,8 +46,8 @@ export function MainMenu() {
   ];
 
   return (
-    <div className={`minecraft-menu ${currentTheme}`}>
-      <div className="minecraft-container">
+    <div className={`minecraft-menu ${currentTheme} ${isMobile ? 'mobile-menu' : 'desktop-menu'}`}>
+      <div className="minecraft-container scrollable-container">
         {/* Title */}
         <div className="minecraft-title">
           <h1>MINECRAFT CHESS</h1>
@@ -109,6 +112,44 @@ export function MainMenu() {
             🏆 Scores & Badges
           </MinecraftButton>
         </div>
+
+        {/* Game Instructions */}
+        {isMobile && (
+          <div className="minecraft-mobile-instructions">
+            <MinecraftButton
+              onClick={() => setShowInstructions(!showInstructions)}
+              variant="secondary"
+              size="medium"
+              className="w-full"
+            >
+              📱 Touch Controls Guide
+            </MinecraftButton>
+            
+            {showInstructions && (
+              <div className="minecraft-instructions-panel">
+                <h3 className="minecraft-section-title">Mobile Controls</h3>
+                <div className="instruction-grid">
+                  <div className="instruction-item">
+                    <span className="instruction-icon">👆</span>
+                    <span className="instruction-text">Tap piece to select</span>
+                  </div>
+                  <div className="instruction-item">
+                    <span className="instruction-icon">✋</span>
+                    <span className="instruction-text">Tap destination to move</span>
+                  </div>
+                  <div className="instruction-item">
+                    <span className="instruction-icon">🔄</span>
+                    <span className="instruction-text">Pinch to zoom camera</span>
+                  </div>
+                  <div className="instruction-item">
+                    <span className="instruction-icon">📱</span>
+                    <span className="instruction-text">Rotate for landscape</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="minecraft-footer">

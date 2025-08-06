@@ -13,12 +13,14 @@ import { ScoreBoard } from "./components/ui/ScoreBoard";
 import { ThemeSelector } from "./components/ui/ThemeSelector";
 import { MultiplayerMenu } from "./components/multiplayer/MultiplayerMenu";
 import { TournamentBracket } from "./components/multiplayer/TournamentBracket";
+import { MobileGameUI } from "./components/ui/MobileGameUI";
+import { TouchChessControls } from "./components/ui/TouchChessControls";
+import { useIsMobile } from "./hooks/use-is-mobile";
 
 import { useChessGame } from "./lib/stores/useChessGame";
 import { useTheme } from "./lib/stores/useTheme";
 import { useAudio } from "./lib/stores/useAudio";
 import { useMultiplayer } from "./lib/stores/useMultiplayer";
-import { useIsMobile } from "./hooks/use-is-mobile";
 import { SoundManager } from "./lib/minecraft/SoundManager";
 
 const queryClient = new QueryClient();
@@ -71,27 +73,33 @@ function App() {
             
             {(gameState === 'playing' || gameState === 'game_over') && (
               <>
-                <Canvas
-                  shadows
-                  camera={{
-                    position: [0, 8, 12],
-                    fov: 45,
-                    near: 0.1,
-                    far: 1000
-                  }}
-                  gl={{
-                    antialias: true,
-                    powerPreference: "high-performance"
-                  }}
-                >
-                  <color attach="background" args={[currentTheme === 'dark' ? "#0f0f23" : "#87ceeb"]} />
-                  
-                  <Suspense fallback={null}>
-                    <GameScene />
-                  </Suspense>
-                </Canvas>
-                
-                <ThemeSelector />
+                {isMobile ? (
+                  <MobileGameUI />
+                ) : (
+                  <>
+                    <Canvas
+                      shadows
+                      camera={{
+                        position: [0, 8, 12],
+                        fov: 45,
+                        near: 0.1,
+                        far: 1000
+                      }}
+                      gl={{
+                        antialias: true,
+                        powerPreference: "high-performance"
+                      }}
+                    >
+                      <color attach="background" args={[currentTheme === 'dark' ? "#0f0f23" : "#87ceeb"]} />
+                      
+                      <Suspense fallback={null}>
+                        <GameScene />
+                      </Suspense>
+                    </Canvas>
+                    
+                    <ThemeSelector />
+                  </>
+                )}
               </>
             )}
             
